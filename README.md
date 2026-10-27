@@ -2,7 +2,7 @@
 
 Lo que suena en tu Spotify, como un vinilo girando. Sin cuentas ni configuración: abre Spotify en tu PC y el vinilo empieza a girar.
 
-![Vinilify en pantalla completa](docs/pantalla-completa.png)
+![Vinilify en pantalla completa](docs/pantalla-completa.jpg)
 
 - **Mini vinilo flotante**: siempre por encima de las demás ventanas. Se arrastra con el mouse; al pasar por encima muestra el tema, los controles y el volumen. Doble clic abre la pantalla completa.
 - **Pantalla completa**: se abre en la pantalla que elijas (por defecto la secundaria). Muestra el vinilo con su funda, el brazo que avanza con la canción, el fondo con los colores de la portada, la **letra sincronizada** y las portadas de lo que sonó antes. Tiene aleatorio, repetir y Me gusta. Mientras está abierta, el monitor no se apaga solo.
@@ -10,7 +10,11 @@ Lo que suena en tu Spotify, como un vinilo girando. Sin cuentas ni configuració
 
 | Mini vinilo | Modo protección |
 |---|---|
-| <img src="docs/mini.png" width="240" alt="Mini vinilo flotante"> | <img src="docs/modo-proteccion.png" width="520" alt="Modo protección de pantalla"> |
+| <img src="docs/mini.png" width="240" alt="Mini vinilo flotante"> | <img src="docs/modo-proteccion.jpg" width="560" alt="Modo protección de pantalla"> |
+
+**Letra sincronizada**, oculta por defecto: se activa con el icono junto al volumen.
+
+![Letra sincronizada](docs/letra.jpg)
 
 Todo se maneja desde el icono de Vinilify en la bandeja del sistema: clic derecho abre el menú y doble clic muestra el mini vinilo. También hay menú con clic derecho sobre el vinilo.
 
@@ -35,6 +39,16 @@ Vinilify lee la app de escritorio de Spotify a través de Windows (lo mismo que 
 | Aleatorio y repetir | Funciona aunque Spotify suene en otro dispositivo |
 | Letras sincronizadas | |
 | Recientes (Vinilify guarda su propio historial) | |
+
+**Con la cuenta conectada:** buscador de canciones, artistas, álbumes y playlists; al abrir un artista aparecen sus canciones, con «Ver más» para seguir cargando.
+
+| Buscador | Artista |
+|---|---|
+| ![Buscador](docs/buscador.jpg) | ![Vista de artista](docs/artista.jpg) |
+
+**Sin cuenta:** todo lo demás funciona igual. Al pulsar Buscar, Vinilify explica qué hace falta y guía paso a paso para conectarla.
+
+![Guía para conectar la cuenta](docs/sin-cuenta.jpg)
 
 Las letras vienen de [LRCLIB](https://lrclib.net) (gratis, sin cuenta).
 
@@ -81,3 +95,5 @@ Hecho con [Electron](https://www.electronjs.org/). La lectura de Windows está e
 ## Licencia
 
 [MIT](LICENSE)
+
+Las capturas muestran canciones del Billboard Hot 100 (octubre de 2026) con sus portadas oficiales, © de sus artistas y sellos. La letra de la captura es «Amazing Grace» (John Newton, 1779), de dominio público.
