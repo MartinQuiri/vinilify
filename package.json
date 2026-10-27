@@ -5,7 +5,7 @@
   "description": "A spinning vinyl of whatever is playing on Spotify: floating mini player and full-screen mode",
   "main": "src/main.js",
   "author": "MartinQuiri",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "private": true,
   "scripts": {
     "start": "electron .",

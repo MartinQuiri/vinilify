@@ -106,6 +106,6 @@ Hecho con [Electron](https://www.electronjs.org/). La lectura de Windows está e
 
 ## Licencia
 
-[MIT](LICENSE)
+[PolyForm Strict 1.0.0](LICENSE). Vinilify es gratis para descargar y usar con cualquier fin no comercial. El código es público para que veas cómo funciona, pero no se puede copiar, modificar ni redistribuir, ni publicar versiones propias.
 
 Las capturas muestran canciones del Billboard Hot 100 (octubre de 2026) con sus portadas oficiales, © de sus artistas y sellos. La letra de la captura es «Amazing Grace» (John Newton, 1779), de dominio público.

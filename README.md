@@ -106,6 +106,6 @@ Built with [Electron](https://www.electronjs.org/). Reading from Windows lives i
 
 ## License
 
-[MIT](LICENSE)
+[PolyForm Strict 1.0.0](LICENSE). Vinilify is free to download and use for any noncommercial purpose. The code is public so you can see how it works, but you may not copy, modify or redistribute it, or publish your own versions.
 
 The screenshots show songs from the Billboard Hot 100 (October 2026) with their official covers, © their artists and labels. The lyrics in the screenshot are "Amazing Grace" (John Newton, 1779), in the public domain.
