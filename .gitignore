@@ -4,6 +4,14 @@ dist/
 # los renders se publican aparte.
 promo/out/
 promo/public/covers/
+# Grabaciones de la app (se regeneran con promo/rig/record.js), herramientas descargadas,
+# y la canción y su letra (se descargan de NCS y LRCLIB; no se redistribuyen).
+promo/public/rec/
+promo/tools/
+promo/public/music/*.mp3
+promo/public/music/*.wav
+promo/public/music/*.m4a
+promo/public/music/*.lrc
 *.log
 .DS_Store
 Thumbs.db
