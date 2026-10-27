@@ -1,0 +1,1 @@
+{"name":"vinilify-promo","private":true,"scripts":{"studio":"remotion studio","render":"remotion render Promo out/vinilify-promo.mp4"},"dependencies":{"@remotion/bundler":"^4.0.539","@remotion/cli":"^4.0.539","@remotion/google-fonts":"^4.0.539","@remotion/media-utils":"^4.0.539","@remotion/renderer":"^4.0.539","react":"^19.3.1","react-dom":"^19.3.1","remotion":"^4.0.539"}}

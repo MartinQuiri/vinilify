@@ -1,5 +1,9 @@
 node_modules/
 dist/
+# Video promocional: las portadas reales tienen derechos de sus sellos y no se redistribuyen;
+# los renders se publican aparte.
+promo/out/
+promo/public/covers/
 *.log
 .DS_Store
 Thumbs.db

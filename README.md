@@ -36,7 +36,9 @@ Vinilify lee la app de escritorio de Spotify a través de Windows (lo mismo que 
 | Letras sincronizadas | |
 | Recientes (Vinilify guarda su propio historial) | |
 
-Las letras vienen de [LRCLIB](https://lrclib.net) (gratis, sin cuenta). Sin cuenta conectada, la portada grande se busca en alta resolución en iTunes y solo se usa si coinciden título, artista y duración; si no, queda la que entrega Windows.
+Las letras vienen de [LRCLIB](https://lrclib.net) (gratis, sin cuenta).
+
+**Portadas:** siempre se muestra la portada real de la canción. Sin cuenta, es la que la app de Spotify le entrega a Windows (unos 300 px); para que la funda grande se vea nítida, Vinilify busca esa misma portada a 1000 px en iTunes y solo la usa si coinciden título, artista y duración. Con la cuenta de Spotify conectada se usan directamente las portadas de Spotify.
 
 ### Conectar la cuenta (opcional, unos 5 minutos)
 
