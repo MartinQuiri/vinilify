@@ -1,0 +1,55 @@
+{
+  "name": "vinilify",
+  "productName": "Vinilify",
+  "version": "0.1.0",
+  "description": "Vinilo girando con lo que suena en Spotify: mini reproductor flotante y modo pantalla completa",
+  "main": "src/main.js",
+  "author": "MartinQuiri",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "full": "electron . --full",
+    "demo": "electron . --demo --full",
+    "dist": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^45.0.0",
+    "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "com.vinilify.app",
+    "productName": "Vinilify",
+    "files": [
+      "src/**/*",
+      "assets/icon.ico",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "src/media/**"
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Vinilify",
+      "artifactName": "Vinilify-Setup-${version}.${ext}"
+    }
+  }
+}
