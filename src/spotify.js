@@ -18,11 +18,11 @@ const API = 'https://api.spotify.com/v1';
 
 const b64url = (buf) => buf.toString('base64url');
 
-function callbackPage(ok, message) {
+function callbackPage(ok, message, closeText) {
   return `<!doctype html><meta charset="utf-8"><title>Vinilify</title>
 <body style="margin:0;height:100vh;display:grid;place-items:center;background:#0b0b0d;color:#f5f3ef;font:16px 'Segoe UI',system-ui,sans-serif">
 <div style="text-align:center"><div style="font-size:48px">${ok ? '💿' : '⚠️'}</div>
-<p>${message}</p><p style="opacity:.5">Ya puedes cerrar esta pestaña.</p></div></body>`;
+<p>${message}</p><p style="opacity:.5">${closeText}</p></div></body>`;
 }
 
 class SpotifyError extends Error {
@@ -43,6 +43,8 @@ class Spotify {
     this.file = file;
     this.pendingLogin = null;
     this.data = {};
+    // Traductor: main.js lo reemplaza por el del idioma elegido.
+    this.t = (key) => key;
     this.writing = Promise.resolve();
   }
 
@@ -112,7 +114,7 @@ class Spotify {
   }
 
   login() {
-    if (!this.clientId) return Promise.reject(new SpotifyError('Falta el Client ID'));
+    if (!this.clientId) return Promise.reject(new SpotifyError(this.t('missingClientId')));
     if (this.pendingLogin) {
       shell.openExternal(this.pendingLogin.url);
       return this.pendingLogin.promise;
@@ -141,17 +143,17 @@ class Spotify {
         }
         const reply = (ok, message) => {
           res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-          res.end(callbackPage(ok, message));
+          res.end(callbackPage(ok, message, this.t('authClose')));
           finish();
         };
 
         if (params.get('state') !== state) {
-          reply(false, 'La respuesta de Spotify no coincide con esta sesión.');
-          return reject(new SpotifyError('Estado OAuth inválido'));
+          reply(false, this.t('authMismatch'));
+          return reject(new SpotifyError(this.t('authMismatch')));
         }
         if (params.get('error')) {
-          reply(false, 'Autorización cancelada.');
-          return reject(new SpotifyError(`Spotify respondió: ${params.get('error')}`));
+          reply(false, this.t('authCancelled'));
+          return reject(new SpotifyError(this.t('spotifySaid', { error: params.get('error') })));
         }
         try {
           await this.tokenRequest({
@@ -160,10 +162,10 @@ class Spotify {
             redirect_uri: REDIRECT_URI,
             code_verifier: verifier,
           });
-          reply(true, '¡Listo! Vinilify ya está conectado a tu Spotify.');
+          reply(true, this.t('authDone'));
           resolve();
         } catch (err) {
-          reply(false, `No se pudo completar el inicio de sesión: ${err.message}`);
+          reply(false, this.t('authFailed', { error: err.message }));
           reject(err);
         }
       });
@@ -178,12 +180,12 @@ class Spotify {
       server.on('error', (err) => {
         finish();
         reject(err.code === 'EADDRINUSE'
-          ? new SpotifyError(`El puerto ${PORT} está ocupado por otro programa`)
+          ? new SpotifyError(this.t('portBusy', { port: PORT }))
           : err);
       });
       timer = setTimeout(() => {
         finish();
-        reject(new SpotifyError('Se agotó el tiempo para autorizar en el navegador'));
+        reject(new SpotifyError(this.t('authTimeout')));
       }, 5 * 60 * 1000);
       server.listen(PORT, '127.0.0.1', () => shell.openExternal(url));
     });
@@ -239,14 +241,14 @@ class Spotify {
       return this.request(method, path, body, true);
     }
     if (res.status === 429) {
-      throw new SpotifyError('Demasiadas peticiones', {
+      throw new SpotifyError('Too many requests', {
         status: 429,
         retryAfter: Number(res.headers.get('retry-after')) || 5,
       });
     }
     if (!res.ok) {
       const json = await res.json().catch(() => ({}));
-      throw new SpotifyError(json.error?.message || `Spotify respondió ${res.status}`, { status: res.status });
+      throw new SpotifyError(json.error?.message || `Spotify HTTP ${res.status}`, { status: res.status });
     }
     // Los comandos (next, pause…) a veces responden con texto que no es JSON; no hay nada que leer ahí.
     if (!res.headers.get('content-type')?.includes('json')) return null;

@@ -1,8 +1,8 @@
 {
   "name": "vinilify",
   "productName": "Vinilify",
-  "version": "0.1.0",
-  "description": "Vinilo girando con lo que suena en Spotify: mini reproductor flotante y modo pantalla completa",
+  "version": "0.2.0",
+  "description": "A spinning vinyl of whatever is playing on Spotify: floating mini player and full-screen mode",
   "main": "src/main.js",
   "author": "MartinQuiri",
   "license": "MIT",
@@ -49,7 +49,14 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "Vinilify",
-      "artifactName": "Vinilify-Setup-${version}.${ext}"
+      "artifactName": "Vinilify-Setup-${version}.${ext}",
+      "installerLanguages": [
+        "en_US",
+        "es_ES"
+      ],
+      "multiLanguageInstaller": true,
+      "displayLanguageSelector": true,
+      "include": "build/installer.nsh"
     }
   }
 }

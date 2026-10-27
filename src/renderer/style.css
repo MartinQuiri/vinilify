@@ -957,3 +957,54 @@ body.mode-setup { background: var(--bg); cursor: default; }
 .lyrics-btn:hover span { max-width: 4em; margin-left: 8px; opacity: 1; }
 /* Activada: el icono toma el color de la portada. */
 .lyrics-btn.on svg { opacity: 1; color: var(--accent); }
+
+/* ---------- Configuración (ventana en modo "settings") ---------- */
+
+body.mode-settings { background: var(--bg); cursor: default; overflow-y: auto; }
+.mode-settings .backdrop, .mode-settings .stage, .mode-settings .strip, .mode-settings .controls,
+.mode-settings .corner { display: none; }
+.mode-settings .modal { background: rgba(6, 6, 8, 0.7); }
+.settings { max-width: 560px; margin: 0 auto; padding: 34px 36px 40px; font-size: 14px; line-height: 1.5; }
+.settings h2 { font-size: 26px; letter-spacing: -0.01em; margin-bottom: 22px; }
+.set-block { padding: 20px 0; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+.set-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.set-head h3 { font-size: 16px; font-weight: 600; }
+.set-head p, .set-hint { width: 100%; margin-top: 2px; color: var(--muted); font-size: 13px; }
+.set-row { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.set-row .set-head { flex: 1; }
+
+.segmented { display: inline-flex; margin-top: 14px; padding: 4px; border-radius: 999px; background: rgba(255, 255, 255, 0.06); }
+.segmented button { padding: 8px 20px; border-radius: 999px; color: var(--muted); font-size: 14px; transition: background 0.2s ease, color 0.2s ease; }
+.segmented button:hover { color: var(--ink); }
+.segmented button.on { background: var(--ink); color: #111; font-weight: 600; }
+
+.account-status { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--muted); }
+.account-status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: rgba(255, 255, 255, 0.25); }
+.account-status.ok { color: var(--ink); }
+.account-status.ok::before { background: #1db954; box-shadow: 0 0 0 3px rgba(29, 185, 84, 0.2); }
+.field-label { display: block; margin-top: 16px; font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); }
+.settings .connect-form { margin-top: 8px; }
+.set-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px; }
+.text-btn { padding: 0; color: var(--accent); font-size: 13px; text-decoration: underline; text-underline-offset: 3px; }
+.ghost-btn { padding: 7px 14px; border-radius: 8px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16); color: var(--muted); font-size: 13px; }
+.ghost-btn:hover { color: #ff8a8a; box-shadow: inset 0 0 0 1px rgba(255, 138, 138, 0.5); }
+
+/* Interruptor */
+.switch { position: relative; flex: none; width: 46px; height: 26px; cursor: pointer; }
+.switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+.switch span { position: absolute; inset: 0; border-radius: 999px; background: rgba(255, 255, 255, 0.16); transition: background 0.25s ease; }
+.switch span::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  transition: transform 0.25s cubic-bezier(0.2, 0.75, 0.2, 1);
+}
+.switch input:checked + span { background: var(--accent); }
+.switch input:checked + span::after { transform: translateX(20px); }
+.switch input:focus-visible + span { box-shadow: 0 0 0 2px var(--ink); }

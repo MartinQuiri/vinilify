@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const { Spotify, REDIRECT_URI } = require('./spotify');
 const { WindowsMedia } = require('./windowsMedia');
+const { DEFAULT_LANG, LANGUAGES, normalize: normalizeLang, translate } = require('./i18n');
 const { fetchLyrics } = require('./lyrics');
 const { findHiresCover } = require('./covers');
 
@@ -27,6 +28,7 @@ let tray;
 let miniWin = null;
 let fullWin = null;
 let setupWin = null;
+let settingsWin = null;
 let sleepBlocker = null;
 
 // Dos fuentes posibles:
@@ -50,10 +52,38 @@ function loadSettings() {
     settings = {};
   }
   settings = { miniSize: 'medium', showMini: true, ...settings };
+  if (!settings.language) {
+    settings.language = installerLanguage() || DEFAULT_LANG;
+    saveSettings();
+  }
+}
+
+// El instalador pregunta el idioma y lo deja en language.txt junto al ejecutable (ver build/installer.nsh).
+function installerLanguage() {
+  if (!app.isPackaged) return null;
+  try {
+    return normalizeLang(fs.readFileSync(path.join(path.dirname(process.execPath), 'language.txt'), 'utf8').trim());
+  } catch {
+    return null;
+  }
 }
 
 function saveSettings() {
   fs.writeFileSync(settingsFile, JSON.stringify(settings, null, 2));
+}
+
+// Texto en el idioma elegido.
+const t = (key, vars) => translate(settings?.language, key, vars);
+
+function setLanguage(lang) {
+  settings.language = normalizeLang(lang);
+  saveSettings();
+  setState({ lang: settings.language });
+  for (const [win, key] of [[setupWin, 'setupWindowTitle'], [settingsWin, 'settingsWindowTitle']]) {
+    if (win && !win.isDestroyed()) win.setTitle(t(key));
+  }
+  lastTrayKey = '';
+  refreshTray();
 }
 
 // ---------- Estado compartido con las ventanas ----------
@@ -73,7 +103,7 @@ function currentProgress() {
 }
 
 function broadcast(channel, payload) {
-  for (const win of [miniWin, fullWin, setupWin]) {
+  for (const win of [miniWin, fullWin, setupWin, settingsWin]) {
     if (win && !win.isDestroyed()) win.webContents.send(channel, payload);
   }
 }
@@ -281,8 +311,8 @@ async function poll() {
 }
 
 function reportCommandError(err) {
-  if (err.status === 403) toast('Controlar la reproducción necesita Spotify Premium');
-  else if (err.status === 404) toast('Abre Spotify en algún dispositivo primero');
+  if (err.status === 403) toast(t('premiumNeeded'));
+  else if (err.status === 404) toast(t('openSpotifyFirst'));
   else toast(err.message);
 }
 
@@ -353,17 +383,17 @@ async function toggleLike() {
   const track = state.track;
   if (!spotify.loggedIn || !track?.uri) return;
   if (!spotify.hasScope('user-library-modify')) {
-    toast('Para «Me gusta» hay que autorizar un permiso más: se abrió el navegador.');
+    toast(t('likePermission'));
     return login();
   }
   const liked = !state.liked;
   setState({ liked });
   try {
     await spotify.request(liked ? 'PUT' : 'DELETE', `/me/library?uris=${encodeURIComponent(track.uri)}`);
-    toast(liked ? 'Guardada en tus Me gusta' : 'Quitada de tus Me gusta');
+    toast(t(liked ? 'likedToast' : 'unlikedToast'));
   } catch (err) {
     setState({ liked: !liked });
-    toast(`No se pudo cambiar «Me gusta»: ${err.message}`);
+    toast(t('likeFailed', { error: err.message }));
   }
 }
 
@@ -371,7 +401,7 @@ async function addToQueue(uri) {
   if (!spotify.loggedIn || !uri) return;
   try {
     await spotify.request('POST', withDevice(`/me/player/queue?uri=${encodeURIComponent(uri)}`));
-    toast('Agregada a la cola');
+    toast(t('queuedToast'));
     lastExtrasAt = 0; // Para que "A continuación" se actualice en el próximo sondeo.
     schedulePoll(800);
   } catch (err) {
@@ -434,7 +464,7 @@ async function search(query) {
     tracks: items(r.tracks).map(toTrack),
     // Igual que en searchTrackPage: `next` no es confiable.
     tracksHasMore: (r.tracks?.items || []).length > 0,
-    artists: items(r.artists).map((a) => ({ uri: a.uri, name: a.name, image: pickThumb(a.images), sub: 'Artista' })),
+    artists: items(r.artists).map((a) => ({ uri: a.uri, name: a.name, image: pickThumb(a.images), sub: t('artist') })),
     albums: items(r.albums).map((a) => ({
       uri: a.uri, name: a.name, image: pickThumb(a.images), sub: a.artists.map((x) => x.name).join(', '),
     })),
@@ -490,7 +520,8 @@ async function login() {
     await spotify.login();
     trackHooksFor = null; // Con los permisos nuevos se vuelve a mirar "Me gusta" de la canción actual.
     broadcast('setup:done');
-    toast('¡Cuenta de Spotify conectada! Ya tienes el buscador y la cola.');
+    broadcast('account:changed');
+    toast(t('accountConnectedToast'));
     startSource();
   } catch (err) {
     broadcast('setup:error', err.message);
@@ -500,7 +531,8 @@ async function login() {
 
 function logout() {
   spotify.logout();
-  toast('Cuenta desconectada. Vinilify sigue leyendo Spotify desde Windows.');
+  broadcast('account:changed');
+  toast(t('accountDisconnectedToast'));
   startSource();
 }
 
@@ -657,13 +689,39 @@ function openSetup() {
     maximizable: false,
     autoHideMenuBar: true,
     backgroundColor: '#0b0b0d',
-    title: 'Conectar cuenta de Spotify — Vinilify',
+    title: t('setupWindowTitle'),
     icon: APP_ICON,
     webPreferences: windowPrefs(),
   });
   setupWin.loadFile(rendererPage, { query: { mode: 'setup' } });
+  setupWin.webContents.on('did-finish-load', () => setupWin.webContents.send('state', state));
   setupWin.on('closed', () => {
     setupWin = null;
+  });
+}
+
+// Configuración: idioma, cuenta de Spotify (Client ID) e inicio con Windows (index.html en modo "settings").
+function openSettings() {
+  if (settingsWin && !settingsWin.isDestroyed()) {
+    settingsWin.focus();
+    return;
+  }
+  settingsWin = new BrowserWindow({
+    width: 620,
+    height: 720,
+    minWidth: 480,
+    minHeight: 520,
+    maximizable: false,
+    autoHideMenuBar: true,
+    backgroundColor: '#0b0b0d',
+    title: t('settingsWindowTitle'),
+    icon: APP_ICON,
+    webPreferences: windowPrefs(),
+  });
+  settingsWin.loadFile(rendererPage, { query: { mode: 'settings' } });
+  settingsWin.webContents.on('did-finish-load', () => settingsWin.webContents.send('state', state));
+  settingsWin.on('closed', () => {
+    settingsWin = null;
   });
 }
 
@@ -675,7 +733,7 @@ const APP_ICON = path.join(__dirname, '..', 'assets', 'icon.ico');
 function buildMenu() {
   const nowPlaying = state.track
     ? `${state.isPlaying ? '▶' : '❚❚'}  ${state.track.name} — ${state.track.artists}`
-    : 'Nada sonando';
+    : t('nothingPlaying');
   const primary = screen.getPrimaryDisplay();
   const fullTarget = targetDisplay();
   const fullOpen = Boolean(fullWin && !fullWin.isDestroyed());
@@ -684,42 +742,43 @@ function buildMenu() {
   // La cuenta es opcional: sin ella Vinilify funciona leyendo Spotify desde Windows.
   const account = spotify.loggedIn
     ? [
-      { label: 'Cuenta de Spotify conectada', enabled: false },
-      { label: 'Desconectar cuenta de Spotify', click: logout },
+      { label: t('trayConnected'), enabled: false },
+      { label: t('trayDisconnect'), click: logout },
     ]
-    : [{ label: 'Conectar cuenta de Spotify (opcional)…', click: openSetup }];
+    : [{ label: t('trayConnect'), click: openSetup }];
 
   return Menu.buildFromTemplate([
     { label: nowPlaying.length > 60 ? nowPlaying.slice(0, 59) + '…' : nowPlaying, enabled: false },
     { type: 'separator' },
-    { label: fullOpen ? 'Salir de pantalla completa' : 'Pantalla completa', click: () => (fullOpen ? closeFull() : openFull()) },
+    { label: fullOpen ? t('exitFullscreen') : t('fullscreen'), click: () => (fullOpen ? closeFull() : openFull()) },
     {
-      label: 'Pantalla completa en',
+      label: t('fullscreenOn'),
       submenu: screen.getAllDisplays().map((d, i) => ({
-        label: `${d.label || `Pantalla ${i + 1}`} (${d.size.width}×${d.size.height})${d.id === primary.id ? ' · principal' : ''}`,
+        label: `${d.label || t('screenN', { n: i + 1 })} (${d.size.width}×${d.size.height})${d.id === primary.id ? ` · ${t('main')}` : ''}`,
         type: 'radio',
         checked: d.id === fullTarget.id,
         click: () => chooseFullDisplay(d),
       })),
     },
     { type: 'separator' },
-    { label: 'Mini vinilo flotante', type: 'checkbox', checked: miniOpen, click: () => (miniOpen ? closeMini() : openMini()) },
+    { label: t('miniVinyl'), type: 'checkbox', checked: miniOpen, click: () => (miniOpen ? closeMini() : openMini()) },
     {
-      label: 'Tamaño del mini',
-      submenu: [['small', 'Pequeño'], ['medium', 'Mediano'], ['large', 'Grande']].map(([key, label]) => ({
-        label, type: 'radio', checked: settings.miniSize === key, click: () => setMiniSize(key),
+      label: t('miniSize'),
+      submenu: ['small', 'medium', 'large'].map((key) => ({
+        label: t(key), type: 'radio', checked: settings.miniSize === key, click: () => setMiniSize(key),
       })),
     },
     { type: 'separator' },
     ...account,
     {
-      label: 'Iniciar con Windows',
+      label: t('startWithWindows'),
       type: 'checkbox',
       checked: app.getLoginItemSettings(loginItemOptions()).openAtLogin,
       click: (item) => app.setLoginItemSettings({ ...loginItemOptions(), openAtLogin: item.checked }),
     },
+    { label: t('traySettings'), click: openSettings },
     { type: 'separator' },
-    { label: 'Salir', click: () => app.quit() },
+    { label: t('quit'), click: () => app.quit() },
   ]);
 }
 
@@ -782,6 +841,22 @@ function registerIpc() {
     saveSettings();
   });
 
+  ipcMain.on('settings:open', openSettings);
+  ipcMain.handle('settings:get', () => ({
+    lang: settings.language,
+    languages: LANGUAGES,
+    clientId: spotify.clientId,
+    loggedIn: spotify.loggedIn,
+    openAtLogin: app.getLoginItemSettings(loginItemOptions()).openAtLogin,
+  }));
+  ipcMain.on('settings:language', (_e, lang) => setLanguage(lang));
+  ipcMain.on('settings:login-item', (_e, on) => {
+    app.setLoginItemSettings({ ...loginItemOptions(), openAtLogin: Boolean(on) });
+    lastTrayKey = '';
+    refreshTray();
+  });
+  ipcMain.on('account:logout', logout);
+
   ipcMain.handle('setup:get', () => ({
     clientId: spotify.clientId,
     loggedIn: spotify.loggedIn,
@@ -789,7 +864,7 @@ function registerIpc() {
   }));
   ipcMain.handle('setup:connect', (_e, clientId) => {
     const id = String(clientId || '').trim();
-    if (!/^[0-9a-f]{32}$/i.test(id)) return { ok: false, error: 'El Client ID son 32 caracteres hexadecimales.' };
+    if (!/^[0-9a-f]{32}$/i.test(id)) return { ok: false, error: t('clientIdInvalid') };
     spotify.setClientId(id);
     login();
     return { ok: true };
@@ -846,7 +921,9 @@ app.whenReady().then(async () => {
   loadSettings();
   loadHistory();
   spotify = new Spotify(path.join(app.getPath('userData'), 'spotify.json'));
+  spotify.t = t; // la página que se abre al autorizar y los errores salen en el idioma elegido
   await spotify.load();
+  state.lang = settings.language;
   registerIpc();
 
   tray = new Tray(APP_ICON);

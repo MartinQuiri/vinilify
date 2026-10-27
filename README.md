@@ -1,99 +1,111 @@
 # Vinilify 💿
 
-Lo que suena en tu Spotify, como un vinilo girando. Sin cuentas ni configuración: abre Spotify en tu PC y el vinilo empieza a girar.
+**English** · [Español](README.es.md)
 
-![Vinilify en pantalla completa](docs/pantalla-completa.jpg)
+Whatever is playing on your Spotify, as a spinning vinyl record. No accounts, no setup: open Spotify on your PC and the record starts spinning.
 
-- **Mini vinilo flotante**: siempre por encima de las demás ventanas. Se arrastra con el mouse; al pasar por encima muestra el tema, los controles y el volumen. Doble clic abre la pantalla completa.
-- **Pantalla completa**: se abre en la pantalla que elijas (por defecto la secundaria). Muestra el vinilo con su funda, el brazo que avanza con la canción, el fondo con los colores de la portada, la **letra sincronizada** y las portadas de lo que sonó antes. Tiene aleatorio, repetir y Me gusta. Mientras está abierta, el monitor no se apaga solo.
-- **Modo protección de pantalla**: para dejarlo en una segunda pantalla. Atenúa la imagen, deja solo el vinilo, el título, el artista, el álbum y la línea de tiempo, y lo mueve muy lentamente para que nada quede fijo. Se activa con el botón de la luna o solo, tras 5 minutos sin pasar el mouse por la ventana.
+![Vinilify in full screen](docs/en/fullscreen.jpg)
 
-| Mini vinilo | Modo protección |
+- **Floating mini vinyl**: always on top of other windows. Drag it with the mouse; hover over it to see the song, the controls and the volume. Double-click to open full screen.
+- **Full screen**: opens on the display you choose (the secondary one by default). Shows the record in its sleeve, a tonearm that moves along with the song, a background tinted with the cover's colors, **synced lyrics** and the covers of what played before. It has shuffle, repeat and Like. While it's open, the monitor won't go to sleep.
+- **Screen protection mode**: for leaving it on a second display. Dims the image, keeps only the record, title, artist, album and timeline, and drifts very slowly so nothing stays in the same spot. Turn it on with the moon button, or it kicks in by itself after 5 minutes without the mouse over the window.
+- **In English and Spanish**: pick it during installation and change it anytime in ⚙ Settings.
+
+| Mini vinyl | Protection mode |
 |---|---|
-| <img src="docs/mini.png" width="240" alt="Mini vinilo flotante"> | <img src="docs/modo-proteccion.jpg" width="560" alt="Modo protección de pantalla"> |
+| <img src="docs/en/mini.png" width="240" alt="Floating mini vinyl"> | <img src="docs/en/protection.jpg" width="560" alt="Screen protection mode"> |
 
-**Letra sincronizada**, oculta por defecto: se activa con el icono junto al volumen.
+**Synced lyrics**, hidden by default: turn them on with the icon next to the volume.
 
-![Letra sincronizada](docs/letra.jpg)
+![Synced lyrics](docs/en/lyrics.jpg)
 
-Todo se maneja desde el icono de Vinilify en la bandeja del sistema: clic derecho abre el menú y doble clic muestra el mini vinilo. También hay menú con clic derecho sobre el vinilo.
+Everything is controlled from the Vinilify icon in the system tray: right-click opens the menu and double-click shows the mini vinyl. Right-clicking the record also opens the menu.
 
-## Descargar
+## Download
 
-1. Descarga `Vinilify-Setup-x.x.x.exe` desde [Releases](https://github.com/MartinQuiri/vinilify/releases/latest).
-2. Ábrelo. Como el instalador no está firmado (firmarlo cuesta dinero), Windows puede mostrar **«Windows protegió su PC»**: pulsa **Más información → Ejecutar de todas formas**.
-3. Abre Spotify y pon una canción.
+1. Download `Vinilify-Setup-x.x.x.exe` from [Releases](https://github.com/MartinQuiri/vinilify/releases/latest).
+2. Open it. Since the installer isn't signed (signing costs money), Windows may show **"Windows protected your PC"**: click **More info → Run anyway**.
+3. Choose the language (English or Spanish) and follow the steps.
+4. Open Spotify and play a song.
 
-Requiere Windows 10 u 11 y la app de escritorio de Spotify.
+Requires Windows 10 or 11 and the Spotify desktop app.
 
-## Cómo funciona
+## How it works
 
-Vinilify lee la app de escritorio de Spotify a través de Windows (lo mismo que muestra el panel de volumen), así que **no necesita iniciar sesión ni Premium**. La música tiene que estar sonando en la app de Spotify de ese mismo PC.
+Vinilify reads the Spotify desktop app through Windows (the same thing the volume flyout shows), so **it doesn't need a login or Premium**. The music has to be playing in the Spotify app on that same PC.
 
-| Sin cuenta (por defecto) | Con cuenta de Spotify conectada (opcional) |
+| Without an account (default) | With a Spotify account connected (optional) |
 |---|---|
-| Vinilo, portada, título, artista y álbum | Todo lo de la izquierda |
-| Reproducir / pausar, anterior, siguiente | **Buscador** de canciones, artistas, álbumes y playlists |
-| Línea de tiempo (se puede arrastrar) | **A continuación**: la cola, y elegir qué suena |
-| Volumen de Spotify en el mezclador de Windows | **Me gusta** y **agregar a la cola** desde el buscador |
-| Aleatorio y repetir | Funciona aunque Spotify suene en otro dispositivo |
-| Letras sincronizadas | |
-| Recientes (Vinilify guarda su propio historial) | |
+| Record, cover, title, artist and album | Everything on the left |
+| Play / pause, previous, next | **Search** for songs, artists, albums and playlists |
+| Timeline (you can drag it) | **Up next**: the queue, and choosing what plays |
+| Spotify's volume in the Windows volume mixer | **Like** and **add to queue** from search |
+| Shuffle and repeat | Works even if Spotify plays on another device |
+| Synced lyrics | |
+| Recent (Vinilify keeps its own history) | |
 
-**Con la cuenta conectada:** buscador de canciones, artistas, álbumes y playlists; al abrir un artista aparecen sus canciones, con «Ver más» para seguir cargando.
+**With an account connected:** search for songs, artists, albums and playlists; open an artist to see their songs, with "See more songs" to keep loading.
 
-| Buscador | Artista |
+| Search | Artist |
 |---|---|
-| ![Buscador](docs/buscador.jpg) | ![Vista de artista](docs/artista.jpg) |
+| ![Search](docs/en/search.jpg) | ![Artist view](docs/en/artist.jpg) |
 
-**Sin cuenta:** todo lo demás funciona igual. Al pulsar Buscar, Vinilify explica qué hace falta y guía paso a paso para conectarla.
+**Without an account:** everything else works the same. When you click Search, Vinilify explains what's needed and walks you through connecting it.
 
-![Guía para conectar la cuenta](docs/sin-cuenta.jpg)
+![Guide to connect the account](docs/en/no-account.jpg)
 
-Las letras vienen de [LRCLIB](https://lrclib.net) (gratis, sin cuenta).
+Lyrics come from [LRCLIB](https://lrclib.net) (free, no account).
 
-**Portadas:** siempre se muestra la portada real de la canción. Sin cuenta, es la que la app de Spotify le entrega a Windows (unos 300 px); para que la funda grande se vea nítida, Vinilify busca esa misma portada a 1000 px en iTunes y solo la usa si coinciden título, artista y duración. Con la cuenta de Spotify conectada se usan directamente las portadas de Spotify.
+**Covers:** the song's real cover is always shown. Without an account, it's the one the Spotify app hands to Windows (about 300 px); to keep the big sleeve sharp, Vinilify looks up that same cover at 1000 px on iTunes and only uses it if the title, artist and duration match. With a Spotify account connected, Spotify's covers are used directly.
 
-### Conectar la cuenta (opcional, unos 5 minutos)
+### Connect your account (optional, about 5 minutes)
 
-Spotify solo deja buscar y ver la cola a apps registradas por cada usuario. Al pulsar **Buscar** en la pantalla completa (o desde el menú de la bandeja), Vinilify muestra una guía paso a paso:
+Spotify only allows search and the queue for apps registered by each user. When you click **Search** in full screen (or in ⚙ Settings), Vinilify shows a step-by-step guide:
 
-1. Entra a <https://developer.spotify.com/dashboard> → **Create app**.
-2. Nombre `Vinilify`, cualquier descripción y en **Redirect URIs** exactamente `http://127.0.0.1:8888/callback`.
-3. Marca **Web API**, acepta los términos y guarda.
-4. Copia el **Client ID** en Vinilify y pulsa **Conectar**; autoriza en el navegador.
+1. Go to <https://developer.spotify.com/dashboard> → **Create app**.
+2. Name it `Vinilify`, any description, and in **Redirect URIs** exactly `http://127.0.0.1:8888/callback`.
+3. Check **Web API**, accept the terms and save.
+4. Copy the **Client ID** into Vinilify and click **Connect**; authorize in the browser.
 
-Spotify pide que la cuenta que crea la app tenga Premium.
+Spotify requires the account that creates the app to have Premium. You can change the Client ID or disconnect later in ⚙ Settings.
 
-## Atajos (pantalla completa)
+## Settings
 
-| Tecla | Acción |
+With the gear ⚙ (in full screen, in the mini or in the tray menu):
+
+- **Language**: English or Spanish; switches instantly.
+- **Spotify account**: see whether it's connected, change the Client ID, reconnect or disconnect.
+- **Start with Windows**.
+
+## Shortcuts (full screen)
+
+| Key | Action |
 |---|---|
-| `Esc` | Salir de pantalla completa |
-| `Espacio` | Reproducir / pausar |
-| `←` / `→` | Anterior / siguiente |
-| `Ctrl+F` o `/` | Buscar |
-| `L` | Mostrar / ocultar la letra |
-| `P` | Modo protección de pantalla |
+| `Esc` | Exit full screen |
+| `Space` | Play / pause |
+| `←` / `→` | Previous / next |
+| `Ctrl+F` or `/` | Search |
+| `L` | Show / hide lyrics |
+| `P` | Screen protection mode |
 
-## Privacidad
+## Privacy
 
-Todo se queda en tu PC, en `%APPDATA%\Vinilify\`: `settings.json` (posición y tamaño del mini, pantalla elegida), `history.json` (recientes) y, si conectas la cuenta, `spotify.json` (Client ID y tokens de acceso, **cifrados con tu usuario de Windows**). Vinilify no tiene servidor propio: solo habla con Spotify, LRCLIB e iTunes.
+Everything stays on your PC, in `%APPDATA%\Vinilify\`: `settings.json` (language, mini position and size, chosen display), `history.json` (recent songs) and, if you connect your account, `spotify.json` (Client ID and access tokens, **encrypted with your Windows user**). Vinilify has no server of its own: it only talks to Spotify, LRCLIB and iTunes.
 
-## Desarrollo
+## Development
 
 ```bash
 npm install
-npm start        # mini vinilo + icono en la bandeja
-npm run full     # abre directo en pantalla completa
-npm run demo     # datos de prueba, sin Spotify
-npm run dist     # genera el instalador en dist/
+npm start        # mini vinyl + tray icon
+npm run full     # opens straight into full screen
+npm run demo     # sample data, no Spotify
+npm run dist     # builds the installer in dist/
 ```
 
-Hecho con [Electron](https://www.electronjs.org/). La lectura de Windows está en `src/media/media-helper.ps1` (PowerShell, incluido en Windows).
+Built with [Electron](https://www.electronjs.org/). Reading from Windows lives in `src/media/media-helper.ps1` (PowerShell, included with Windows). The app's texts are in `src/i18n.js`.
 
-## Licencia
+## License
 
 [MIT](LICENSE)
 
-Las capturas muestran canciones del Billboard Hot 100 (octubre de 2026) con sus portadas oficiales, © de sus artistas y sellos. La letra de la captura es «Amazing Grace» (John Newton, 1779), de dominio público.
+The screenshots show songs from the Billboard Hot 100 (October 2026) with their official covers, © their artists and labels. The lyrics in the screenshot are "Amazing Grace" (John Newton, 1779), in the public domain.

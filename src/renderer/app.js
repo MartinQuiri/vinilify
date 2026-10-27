@@ -1,6 +1,6 @@
 const api = window.vinilify;
-// full: pantalla completa · mini: vinilo flotante · setup: ventana con la guía para conectar la cuenta.
-const mode = ['mini', 'setup'].includes(new URLSearchParams(location.search).get('mode'))
+// full: pantalla completa · mini: vinilo flotante · setup: guía para conectar la cuenta · settings: configuración.
+const mode = ['mini', 'setup', 'settings'].includes(new URLSearchParams(location.search).get('mode'))
   ? new URLSearchParams(location.search).get('mode')
   : 'full';
 const $ = (id) => document.getElementById(id);
@@ -13,12 +13,35 @@ const ARM_SWEEP = 16;
 // Al arrastrar la línea de tiempo de punta a punta, el disco da 4 vueltas.
 const SCRUB_DEG = 4 * 360;
 
+// Claves de i18n.js: [rótulo, título, texto].
 const MESSAGES = {
-  loading: ['', '', ''],
-  idle: ['En silencio', 'Nada sonando', 'Abre Spotify y pon una canción: el vinilo empezará a girar.'],
+  idle: ['idleEyebrow', 'idleTitle', 'idleText'],
 };
 
 let state = { status: 'loading' };
+
+// ---------- Idioma ----------
+
+// Texto en el idioma elegido (lo manda el proceso principal en state.lang).
+const tr = (key, vars) => window.VinilifyI18n.translate(state.lang, key, vars);
+
+// Pone los textos fijos de la página: data-i18n (texto), data-i18n-html (con <b>), y atributos.
+let appliedLang = null;
+function applyI18n() {
+  const lang = window.VinilifyI18n.normalize(state.lang);
+  if (lang === appliedLang) return;
+  appliedLang = lang;
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach((node) => { node.textContent = tr(node.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-html]').forEach((node) => { node.innerHTML = tr(node.dataset.i18nHtml); });
+  document.querySelectorAll('[data-i18n-title]').forEach((node) => { node.title = tr(node.dataset.i18nTitle); });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach((node) => { node.placeholder = tr(node.dataset.i18nPlaceholder); });
+  document.querySelectorAll('[data-i18n-aria]').forEach((node) => node.setAttribute('aria-label', tr(node.dataset.i18nAria)));
+  // Lo que depende del estado (títulos de botones, listas, rótulos) se vuelve a pintar.
+  ['next', 'recent'].forEach((name) => { if ($(name)) $(name).dataset.key = ''; });
+  onLanguageChanged.forEach((fn) => fn());
+}
+const onLanguageChanged = [];
 let shownTrackId = null;
 let backdropIndex = 0;
 
@@ -30,6 +53,7 @@ document.body.classList.add(`mode-${mode}`);
 function applyState(patch) {
   if (!patch) return;
   state = { ...state, ...patch };
+  applyI18n();
   render();
 }
 
@@ -51,7 +75,7 @@ function render() {
   document.body.classList.toggle('no-seek', !state.canSeek);
 
   if (status === 'playing' && track) {
-    $('eyebrow').textContent = state.isPlaying ? 'Sonando ahora' : 'En pausa';
+    $('eyebrow').textContent = tr(state.isPlaying ? 'nowPlaying' : 'paused');
     if (track.id !== shownTrackId) showTrack(track);
     else if (track.cover && $('sleeve-img').getAttribute('src') !== track.cover) {
       // La portada llegó después que el título: se pone sin repetir el fundido.
@@ -63,7 +87,7 @@ function render() {
   } else if (status === 'loading') {
     // Aún no se sabe nada (Vinilify recién arrancando): mejor no mostrar textos que cambiarán enseguida.
   } else {
-    const [eyebrow, title, sub] = MESSAGES[status] || MESSAGES.idle;
+    const [eyebrow, title, sub] = (MESSAGES[status] || MESSAGES.idle).map((key) => tr(key));
     $('eyebrow').textContent = eyebrow;
     $('title').textContent = title;
     $('artist').textContent = sub;
@@ -110,18 +134,18 @@ function renderToggles() {
   const shuffle = $('btn-shuffle');
   shuffle.hidden = state.shuffle == null;
   shuffle.classList.toggle('on', Boolean(state.shuffle));
-  shuffle.title = state.shuffle ? 'Aleatorio: activado' : 'Aleatorio';
+  shuffle.title = tr(state.shuffle ? 'shuffleOn' : 'shuffle');
 
   const repeat = $('btn-repeat');
   repeat.hidden = state.repeat == null;
   repeat.classList.toggle('on', state.repeat === 'context' || state.repeat === 'track');
   repeat.classList.toggle('one', state.repeat === 'track');
-  repeat.title = { context: 'Repetir: toda la lista', track: 'Repetir: esta canción' }[state.repeat] || 'Repetir';
+  repeat.title = tr({ context: 'repeatContext', track: 'repeatTrack' }[state.repeat] || 'repeat');
 
   // Sin cuenta el corazón se muestra igual: al pulsarlo aparece la guía para conectarla.
   const like = $('btn-like');
   like.classList.toggle('on', Boolean(state.liked));
-  like.title = state.liked ? 'Quitar de Me gusta' : 'Me gusta';
+  like.title = tr(state.liked ? 'unlike' : 'like');
 }
 
 // ---------- Letra sincronizada ----------
@@ -144,7 +168,7 @@ function renderLyricsVisibility() {
   const lines = currentLyrics();
   $('lyrics').hidden = !(lyricsOn && lines && state.status === 'playing');
   $('btn-lyrics').classList.toggle('on', lyricsOn);
-  $('btn-lyrics').title = lyricsOn ? 'Ocultar la letra' : 'Mostrar la letra';
+  $('btn-lyrics').title = tr(lyricsOn ? 'hideLyrics' : 'showLyrics');
   $('btn-lyrics').hidden = !lines || state.status !== 'playing';
 }
 
@@ -284,7 +308,7 @@ function renderStrip(name, tracks = []) {
     // Las de la cola se tocan dentro del contexto actual (álbum/playlist); las recientes, en el suyo.
     if (name === 'recent' && t.contextUri) li.dataset.context = t.contextUri;
     li.dataset.query = `${t.name} ${t.artists}`;
-    li.title = t.uri ? `Reproducir «${t.name}»` : `Buscar «${t.name}» en Spotify`;
+    li.title = tr(t.uri ? 'playTrack' : 'searchInSpotify', { name: t.name });
     const img = el('img');
     img.src = t.thumb || t.cover;
     img.alt = '';
@@ -468,7 +492,7 @@ searchInput.addEventListener('input', () => {
   if (!q) {
     searchSeq++;
     lastResults = null;
-    return hint('Escribe para buscar en Spotify. Haz clic en un resultado para que suene.');
+    return hint(tr('searchHint'));
   }
   searchTimer = setTimeout(async () => {
     const seq = ++searchSeq;
@@ -492,7 +516,7 @@ function trackRow(t) {
   // "+" aparece al pasar el mouse: agrega la canción a la cola sin cortar la que suena.
   const add = el('span', 'add-queue');
   add.dataset.add = t.uri;
-  add.title = 'Agregar a la cola';
+  add.title = tr('addToQueue');
   add.innerHTML = '<svg viewBox="0 0 24 24"><path d="M3 6h12v2H3zm0 4h12v2H3zm0 4h8v2H3zm14-1v-3h2v3h3v2h-3v3h-2v-3h-3v-2z"/></svg>';
   row.append(img, text, add, el('span', 'time', fmt(t.durationMs)));
   return row;
@@ -502,7 +526,7 @@ function trackRow(t) {
 // ({ tracks, nextOffset, hasMore }); `first` es la primera, ya cargada.
 function pagedTracks(loadPage, first) {
   const box = el('div', 'track-list');
-  const more = el('button', 'more', 'Ver más canciones');
+  const more = el('button', 'more', tr('seeMore'));
   const seen = new Set();
   let offset = 0;
   const append = (page) => {
@@ -526,27 +550,27 @@ function pagedTracks(loadPage, first) {
 
   more.addEventListener('click', async () => {
     more.disabled = true;
-    more.textContent = 'Cargando…';
+    more.textContent = tr('loading');
     const page = await loadPage(offset);
     more.disabled = false;
     if (!page || page.error) {
-      more.textContent = 'No se pudo cargar. Reintentar';
+      more.textContent = tr('loadFailed');
       return;
     }
-    more.textContent = 'Ver más canciones';
+    more.textContent = tr('seeMore');
     append(page);
   });
   return box;
 }
 
 function renderResults(r) {
-  if (!r) return hint('Conecta Spotify para buscar.');
+  if (!r) return hint(tr('connectToSearch'));
   if (r.error) return hint(r.error);
   const parts = [];
   if (r.tracks.length) {
     const query = lastQuery;
     const first = { tracks: r.tracks, nextOffset: r.tracks.length, hasMore: r.tracksHasMore };
-    parts.push(el('h4', null, 'Canciones'), pagedTracks((offset) => api.searchTracks(query, offset), first));
+    parts.push(el('h4', null, tr('songs')), pagedTracks((offset) => api.searchTracks(query, offset), first));
   }
   const tileGroup = (title, items, kind) => {
     if (!items.length) return;
@@ -561,7 +585,7 @@ function renderResults(r) {
       tile.dataset.kind = kind;
       tile.dataset.name = item.name;
       if (item.image) tile.dataset.image = item.image;
-      tile.title = kind === 'artist' ? `Ver canciones de ${item.name}` : `Reproducir «${item.name}»`;
+      tile.title = tr(kind === 'artist' ? 'seeArtistSongs' : 'playTrack', { name: item.name });
       const img = el('img');
       if (item.image) img.src = item.image;
       img.alt = '';
@@ -570,10 +594,10 @@ function renderResults(r) {
     }
     parts.push(grid);
   };
-  tileGroup('Artistas', r.artists, 'artist');
-  tileGroup('Álbumes', r.albums, 'album');
-  tileGroup('Playlists', r.playlists, 'playlist');
-  if (!parts.length) return hint('Sin resultados.');
+  tileGroup(tr('artists'), r.artists, 'artist');
+  tileGroup(tr('albums'), r.albums, 'album');
+  tileGroup(tr('playlists'), r.playlists, 'playlist');
+  if (!parts.length) return hint(tr('noResults'));
   $('results').replaceChildren(...parts);
   $('results').scrollTop = 0;
 }
@@ -581,7 +605,7 @@ function renderResults(r) {
 // Vista de un artista: cabecera con su foto y botón para reproducirlo, y sus canciones por páginas.
 async function openArtist({ uri, name, image }) {
   const seq = ++searchSeq;
-  const back = el('button', 'back', '← Volver a los resultados');
+  const back = el('button', 'back', tr('backToResults'));
   back.dataset.nav = 'back';
 
   const head = el('div', 'artist-head');
@@ -589,15 +613,16 @@ async function openArtist({ uri, name, image }) {
   if (image) img.src = image;
   img.alt = '';
   const info = el('div', 'artist-info');
-  info.append(el('span', 'sub', 'Artista'), el('h3', null, name));
+  info.append(el('span', 'sub', tr('artist')), el('h3', null, name));
   const playAll = el('button', 'play-artist');
   playAll.dataset.uri = uri;
-  playAll.title = `Reproducir ${name}`;
-  playAll.innerHTML = '<svg viewBox="0 0 24 24"><path d="M7 4.5v15L20 12z"/></svg><span>Reproducir</span>';
+  playAll.title = tr('playArtist', { name });
+  playAll.innerHTML = '<svg viewBox="0 0 24 24"><path d="M7 4.5v15L20 12z"/></svg><span></span>';
+  playAll.querySelector('span').textContent = tr('play');
   head.append(img, info, playAll);
 
   const results = $('results');
-  results.replaceChildren(back, head, el('p', 'hint', 'Cargando canciones…'));
+  results.replaceChildren(back, head, el('p', 'hint', tr('loadingSongs')));
   results.scrollTop = 0;
 
   const artistId = uri.split(':').pop();
@@ -605,10 +630,10 @@ async function openArtist({ uri, name, image }) {
   const page = await loadPage(0);
   if (seq !== searchSeq) return;
   if (!page || page.error || !page.tracks.length) {
-    results.replaceChildren(back, head, el('p', 'hint', page?.error || 'No se encontraron canciones.'));
+    results.replaceChildren(back, head, el('p', 'hint', page?.error || tr('noSongs')));
     return;
   }
-  results.replaceChildren(back, head, el('h4', null, 'Canciones'), pagedTracks(loadPage, page));
+  results.replaceChildren(back, head, el('h4', null, tr('songs')), pagedTracks(loadPage, page));
 }
 
 $('results').addEventListener('click', (e) => {
@@ -642,16 +667,12 @@ function connectStatus(text, kind = '') {
   $('connect-status').className = `connect-status ${kind}`;
 }
 
-const CONNECT_TITLES = {
-  search: 'Para buscar necesitas tu propia API de Spotify',
-  like: 'Para «Me gusta» necesitas tu propia API de Spotify',
-  setup: 'Conecta tu cuenta de Spotify',
-};
+const CONNECT_TITLES = { search: 'connectTitleSearch', like: 'connectTitleLike', setup: 'connectTitleSetup' };
 
 let connectReason = 'setup';
 function openConnect(reason = 'search') {
   connectReason = reason;
-  $('connect-title').textContent = CONNECT_TITLES[reason] || CONNECT_TITLES.setup;
+  $('connect-title').textContent = tr(CONNECT_TITLES[reason] || CONNECT_TITLES.setup);
   connectModal.hidden = false;
   document.body.classList.add('modal-open');
   connectStatus('');
@@ -677,10 +698,10 @@ connectModal.addEventListener('click', (e) => {
 connectModal.querySelectorAll('[data-copy], [data-copy-from]').forEach((btn) => {
   btn.addEventListener('click', () => {
     api.copy(btn.dataset.copy ?? $(btn.dataset.copyFrom).textContent);
-    btn.textContent = '¡Copiado!';
+    btn.textContent = tr('copied');
     btn.classList.add('copied');
     setTimeout(() => {
-      btn.textContent = 'Copiar';
+      btn.textContent = tr('copy');
       btn.classList.remove('copied');
     }, 1400);
   });
@@ -691,12 +712,12 @@ $('connect-form').addEventListener('submit', async (e) => {
   const result = await api.setup.connect(connectInput.value);
   if (!result.ok) return connectStatus(result.error, 'error');
   $('connect-submit').disabled = true;
-  connectStatus('Se abrió el navegador: pulsa «Aceptar» para autorizar a Vinilify…');
+  connectStatus(tr('authorizeInBrowser'));
 });
 
 api.setup.onDone(() => {
   if (connectModal.hidden) return;
-  connectStatus('¡Listo! Cuenta conectada.', 'ok');
+  connectStatus(tr('connected'), 'ok');
   state = { ...state, source: 'api' };
   setTimeout(() => {
     closeConnect();
@@ -709,6 +730,58 @@ api.setup.onError((message) => {
   $('connect-submit').disabled = false;
   connectStatus(message, 'error');
 });
+
+// El título de la guía no es un texto fijo: si cambia el idioma con la guía abierta, se actualiza.
+onLanguageChanged.push(() => {
+  if (!connectModal.hidden) $('connect-title').textContent = tr(CONNECT_TITLES[connectReason] || CONNECT_TITLES.setup);
+});
+
+// ---------- Configuración (ventana en modo "settings") ----------
+
+function settingsStatus(text, kind = '') {
+  $('settings-status').textContent = text;
+  $('settings-status').className = `connect-status ${kind}`;
+}
+
+async function renderSettings() {
+  const s = await api.settings.get();
+  $('lang-options').replaceChildren(...Object.entries(s.languages).map(([code, name]) => {
+    const btn = el('button', code === s.lang ? 'on' : '', name);
+    btn.type = 'button';
+    btn.addEventListener('click', () => api.settings.setLanguage(code));
+    return btn;
+  }));
+  const status = $('account-status');
+  status.textContent = tr(s.loggedIn ? 'accountConnected' : 'accountNotConnected');
+  status.classList.toggle('ok', s.loggedIn);
+  const input = $('settings-client-id');
+  if (document.activeElement !== input) input.value = s.clientId || '';
+  $('settings-connect').textContent = tr(s.loggedIn ? 'reconnect' : s.clientId ? 'connect' : 'saveAndConnect');
+  $('settings-logout').hidden = !s.loggedIn;
+  $('login-item').checked = s.openAtLogin;
+}
+
+function initSettings() {
+  $('settings').hidden = false;
+  renderSettings();
+  onLanguageChanged.push(renderSettings);
+  api.onAccountChanged(() => {
+    settingsStatus('');
+    renderSettings();
+  });
+  $('settings-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const result = await api.setup.connect($('settings-client-id').value);
+    if (!result.ok) return settingsStatus(result.error, 'error');
+    settingsStatus(tr('authorizeInBrowser'));
+  });
+  api.setup.onDone(() => settingsStatus(tr('connected'), 'ok'));
+  api.setup.onError((message) => settingsStatus(message, 'error'));
+  $('login-item').addEventListener('change', (e) => api.settings.setLoginItem(e.target.checked));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !connectModal.hidden) closeConnect();
+  });
+}
 
 // ---------- Modo protección de pantalla ----------
 // Para dejar Vinilify en una segunda pantalla: atenúa, deja solo el vinilo, el título, el artista y la
@@ -724,7 +797,7 @@ function applyProtect() {
   const on = protectManual || protectAuto;
   document.body.classList.toggle('protect', on);
   $('btn-protect').classList.toggle('on', on);
-  $('btn-protect').title = on ? 'Salir del modo protección' : 'Modo protección de pantalla';
+  $('btn-protect').title = tr(on ? 'protectOff' : 'protect');
   if (on) closeSearch();
 }
 
@@ -761,6 +834,9 @@ const actions = {
   'search-close': closeSearch,
   'connect-close': closeConnect,
   'open-dashboard': () => api.setup.openDashboard(),
+  settings: () => api.settings.open(),
+  'settings-guide': () => openConnect('setup'),
+  'settings-logout': () => api.settings.logout(),
   like: () => (state.source === 'api' ? api.control('like') : openConnect('like')),
   protect: toggleProtect,
   lyrics: () => {
@@ -836,6 +912,8 @@ if (mode === 'mini') {
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeConnect();
   });
+} else if (mode === 'settings') {
+  initSettings();
 } else {
   // Pantalla completa: los controles y el cursor se esconden solos (salvo con el buscador abierto).
   let sleepTimer;

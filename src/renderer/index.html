@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta http-equiv="Content-Security-Policy"
@@ -93,7 +93,7 @@
       <p class="artist" id="artist"></p>
       <p class="album" id="album"></p>
       <div class="progress" id="progress">
-        <div class="scrub" id="scrub" title="Arrastra para moverte por la canción">
+        <div class="scrub" id="scrub" data-i18n-title="scrubTitle">
           <div class="bar"><i id="bar"></i></div>
           <span class="knob" id="knob"></span>
         </div>
@@ -102,7 +102,7 @@
       <div class="tools">
       <!-- Volumen discreto: solo el icono; la barra se despliega al pasar el mouse. -->
       <div class="volume" id="volume-row" hidden>
-        <button data-action="mute" class="vol-icon" title="Silenciar">
+        <button data-action="mute" class="vol-icon" data-i18n-title="mute">
           <svg viewBox="0 0 24 24">
             <path d="M3.5 9.2h3.8L12 5v14l-4.7-4.2H3.5z"/>
             <path class="wave wave1" d="M15 9.2a4 4 0 0 1 0 5.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
@@ -111,14 +111,14 @@
           </svg>
         </button>
         <div class="vol-slide">
-          <input type="range" id="volume" min="0" max="100" step="1" value="50" aria-label="Volumen">
+          <input type="range" id="volume" min="0" max="100" step="1" value="50" data-i18n-aria="volume">
         </div>
         <span class="vol-value" id="volume-value">50</span>
       </div>
       <!-- Letra: oculta por defecto; solo aparece el icono si la canción tiene letra sincronizada. -->
-      <button data-action="lyrics" class="lyrics-btn" id="btn-lyrics" title="Mostrar la letra" hidden>
+      <button data-action="lyrics" class="lyrics-btn" id="btn-lyrics" hidden>
         <svg viewBox="0 0 24 24"><path d="M4 5h16v2H4zm0 4h11v2H4zm0 4h16v2H4zm0 4h9v2H4z"/></svg>
-        <span>Letra</span>
+        <span data-i18n="lyrics"></span>
       </button>
       </div>
       <!-- Letra sincronizada: línea anterior, actual y siguiente. -->
@@ -132,55 +132,58 @@
 
   <footer class="strip">
     <div class="group" id="recent-group" hidden>
-      <h3>Recientes</h3>
+      <h3 data-i18n="recent"></h3>
       <ul id="recent"></ul>
     </div>
     <div class="group" id="next-group" hidden>
-      <h3>A continuación</h3>
+      <h3 data-i18n="upNext"></h3>
       <ul id="next"></ul>
     </div>
   </footer>
 
   <div class="controls" id="controls">
-    <button data-action="shuffle" class="only-full toggle-btn" id="btn-shuffle" title="Aleatorio">
+    <button data-action="shuffle" class="only-full toggle-btn" id="btn-shuffle">
       <svg viewBox="0 0 24 24"><path d="M10.6 9.2 5.4 4 4 5.4l5.2 5.2zM14.5 4l2 2L4 18.6 5.4 20 18 7.5l2 2V4zm.3 9.4-1.4 1.4 3.1 3.1-2 2.1H20v-5.5l-2 2z"/></svg>
     </button>
-    <button data-action="previous" title="Anterior">
+    <button data-action="previous" data-i18n-title="previous">
       <svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg>
     </button>
-    <button data-action="toggle" class="play" title="Reproducir / pausar">
+    <button data-action="toggle" class="play" data-i18n-title="playPause">
       <svg class="icon-play" viewBox="0 0 24 24"><path d="M7 4.5v15L20 12z"/></svg>
       <svg class="icon-pause" viewBox="0 0 24 24"><path d="M6 4h4.5v16H6zM13.5 4H18v16h-4.5z"/></svg>
     </button>
-    <button data-action="next" title="Siguiente">
+    <button data-action="next" data-i18n-title="next">
       <svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5v14l11-7z"/></svg>
     </button>
-    <button data-action="repeat" class="only-full toggle-btn" id="btn-repeat" title="Repetir">
+    <button data-action="repeat" class="only-full toggle-btn" id="btn-repeat">
       <svg class="icon-repeat" viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2z"/></svg>
       <svg class="icon-repeat-one" viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2zm-4-2V9h-1l-2 1v1h1.5v4z"/></svg>
     </button>
     <span class="controls-sep only-full"></span>
-    <button data-action="like" class="only-full toggle-btn" id="btn-like" title="Me gusta">
+    <button data-action="like" class="only-full toggle-btn" id="btn-like">
       <svg class="icon-heart" viewBox="0 0 24 24"><path d="M16.5 3c-1.7 0-3.4.8-4.5 2.1C10.9 3.8 9.2 3 7.5 3 4.4 3 2 5.4 2 8.5c0 3.8 3.4 6.9 8.6 11.5l1.4 1.3 1.4-1.3C18.6 15.4 22 12.3 22 8.5 22 5.4 19.6 3 16.5 3zm-4.4 15.6-.1.1-.1-.1C7.1 14.2 4 11.4 4 8.5 4 6.5 5.5 5 7.5 5c1.5 0 3 1 3.6 2.4h1.9C13.5 6 15 5 16.5 5c2 0 3.5 1.5 3.5 3.5 0 2.9-3.1 5.7-7.9 10.1z"/></svg>
       <svg class="icon-heart-on" viewBox="0 0 24 24"><path d="m12 21.3-1.4-1.3C5.4 15.4 2 12.3 2 8.5 2 5.4 4.4 3 7.5 3c1.7 0 3.4.8 4.5 2.1C13.1 3.8 14.8 3 16.5 3 19.6 3 22 5.4 22 8.5c0 3.8-3.4 6.9-8.6 11.5z"/></svg>
     </button>
   </div>
 
   <div class="corner" id="corner">
-    <button data-action="search" class="only-full search-btn" title="Buscar (Ctrl+F)">
+    <button data-action="search" class="only-full search-btn" data-i18n-title="searchTitle">
       <svg viewBox="0 0 24 24"><path d="M10.5 3a7.5 7.5 0 0 1 5.9 12.1l4.8 4.8-1.4 1.4-4.8-4.8A7.5 7.5 0 1 1 10.5 3zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11z"/></svg>
-      <span>Buscar</span>
+      <span data-i18n="search"></span>
     </button>
-    <button data-action="protect" class="only-full corner-toggle" id="btn-protect" title="Modo protección de pantalla">
+    <button data-action="protect" class="only-full corner-toggle" id="btn-protect">
       <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.5 0-.9-.1-1.4a5.4 5.4 0 0 1-4.4 2.3 5.4 5.4 0 0 1-3.1-9.8L12 3z"/></svg>
     </button>
-    <button data-action="to-mini" class="only-full" title="Cambiar a mini vinilo">
+    <button data-action="to-mini" class="only-full" data-i18n-title="toMini">
       <svg viewBox="0 0 24 24"><path d="M3 5h18v8h-2V7H5v10h6v2H3zM13 15h8v6h-8z"/></svg>
     </button>
-    <button data-action="expand" class="only-mini" title="Pantalla completa">
+    <button data-action="settings" data-i18n-title="settings">
+      <svg viewBox="0 0 24 24"><path d="M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3.3h-4l-.4 2.6a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.5 7.5 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.4 7.4 0 0 0 1.7 1l.4 2.6h4l.4-2.6a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.5zM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg>
+    </button>
+    <button data-action="expand" class="only-mini" data-i18n-title="fullscreen">
       <svg viewBox="0 0 24 24"><path d="M4 4h6v2H6v4H4zM14 4h6v6h-2V6h-4zM4 14h2v4h4v2H4zM18 14h2v6h-6v-2h4z"/></svg>
     </button>
-    <button data-action="close" title="Cerrar">
+    <button data-action="close" data-i18n-title="close">
       <svg viewBox="0 0 24 24"><path d="M6.4 5 12 10.6 17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6 10.6 12 5 6.4z"/></svg>
     </button>
   </div>
@@ -188,66 +191,100 @@
   <aside class="search" id="search" hidden>
     <div class="search-box">
       <svg viewBox="0 0 24 24"><path d="M10.5 3a7.5 7.5 0 0 1 5.9 12.1l4.8 4.8-1.4 1.4-4.8-4.8A7.5 7.5 0 1 1 10.5 3zm0 2a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11z"/></svg>
-      <input id="search-input" placeholder="Canciones, artistas, álbumes o playlists" spellcheck="false" autocomplete="off">
-      <button data-action="search-close" title="Cerrar búsqueda (Esc)">
+      <input id="search-input" data-i18n-placeholder="searchPlaceholder" spellcheck="false" autocomplete="off">
+      <button data-action="search-close" data-i18n-title="closeSearch">
         <svg viewBox="0 0 24 24"><path d="M6.4 5 12 10.6 17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6 10.6 12 5 6.4z"/></svg>
       </button>
     </div>
     <div class="results" id="results">
-      <p class="hint">Escribe para buscar en Spotify. Haz clic en un resultado para que suene.</p>
+      <p class="hint" data-i18n="searchHint"></p>
     </div>
   </aside>
 
   <!-- Aparece al pulsar "Buscar" sin cuenta conectada: guía para crear la API de Spotify. -->
   <div class="modal" id="connect" hidden>
     <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="connect-title">
-      <button class="sheet-close" data-action="connect-close" title="Cerrar (Esc)">
+      <button class="sheet-close" data-action="connect-close" data-i18n-title="close">
         <svg viewBox="0 0 24 24"><path d="M6.4 5 12 10.6 17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6 10.6 12 5 6.4z"/></svg>
       </button>
-      <p class="sheet-eyebrow">Opcional · unos 5 minutos</p>
-      <h2 id="connect-title">Conecta tu cuenta de Spotify</h2>
-      <p class="sheet-lead">Con tu propia API de Spotify, Vinilify suma el buscador, la cola «A continuación» y «Me gusta». Spotify solo permite estas funciones a apps registradas por cada usuario. Crearla es gratis y se hace una sola vez. Todo lo demás funciona sin esto.</p>
+      <p class="sheet-eyebrow" data-i18n="connectEyebrow"></p>
+      <h2 id="connect-title"></h2>
+      <p class="sheet-lead" data-i18n="connectLead"></p>
 
       <ol class="steps">
         <li>
-          <h3>Abre el panel de desarrolladores de Spotify</h3>
-          <p>Inicia sesión con tu cuenta de Spotify y pulsa <b>Create app</b>.</p>
+          <h3 data-i18n="step1Title"></h3>
+          <p data-i18n-html="step1Text"></p>
           <button class="open-link" data-action="open-dashboard">
             developer.spotify.com/dashboard
             <svg viewBox="0 0 24 24"><path d="M14 4h6v6h-2V7.4l-7.3 7.3-1.4-1.4L16.6 6H14zM5 6h6v2H6v10h10v-5h2v7H4V6z"/></svg>
           </button>
         </li>
         <li>
-          <h3>Completa el formulario así</h3>
+          <h3 data-i18n="step2Title"></h3>
           <dl class="fields">
-            <div><dt>App name</dt><dd><code>Vinilify</code><button data-copy="Vinilify">Copiar</button></dd></div>
-            <div><dt>App description</dt><dd><code>Vinilo de Spotify en mi escritorio</code><button data-copy="Vinilo de Spotify en mi escritorio">Copiar</button></dd></div>
-            <div><dt>Website</dt><dd class="muted">Déjalo vacío</dd></div>
+            <div><dt>App name</dt><dd><code>Vinilify</code><button data-copy="Vinilify" data-i18n="copy"></button></dd></div>
+            <div><dt>App description</dt><dd><code id="app-description" data-i18n="appDescriptionValue"></code><button data-copy-from="app-description" data-i18n="copy"></button></dd></div>
+            <div><dt>Website</dt><dd class="muted" data-i18n="leaveEmpty"></dd></div>
             <div>
               <dt>Redirect URIs</dt>
-              <dd><code id="connect-redirect">http://127.0.0.1:8888/callback</code><button data-copy-from="connect-redirect">Copiar</button></dd>
-              <small>Pégalo y pulsa <b>Add</b>. Tiene que ser exactamente este.</small>
+              <dd><code id="connect-redirect">http://127.0.0.1:8888/callback</code><button data-copy-from="connect-redirect" data-i18n="copy"></button></dd>
+              <small data-i18n-html="redirectHint"></small>
             </div>
-            <div><dt>Which API/SDKs…?</dt><dd>Marca solo <b>Web API</b></dd></div>
+            <div><dt>Which API/SDKs…?</dt><dd data-i18n-html="checkWebApi"></dd></div>
           </dl>
-          <p>Acepta los términos y pulsa <b>Save</b>.</p>
+          <p data-i18n-html="acceptSave"></p>
         </li>
         <li>
-          <h3>Copia el Client ID y pégalo aquí</h3>
-          <p>Aparece arriba en la página de tu app recién creada.</p>
+          <h3 data-i18n="step3Title"></h3>
+          <p data-i18n="step3Text"></p>
           <form class="connect-form" id="connect-form">
-            <input id="connect-id" placeholder="Client ID (32 caracteres)" spellcheck="false" autocomplete="off">
-            <button type="submit" id="connect-submit">Conectar</button>
+            <input id="connect-id" data-i18n-placeholder="clientIdPlaceholder" spellcheck="false" autocomplete="off">
+            <button type="submit" id="connect-submit" data-i18n="connect"></button>
           </form>
           <p class="connect-status" id="connect-status"></p>
         </li>
       </ol>
-      <p class="sheet-note">Spotify pide que la cuenta que crea la app tenga Premium. Tus datos quedan solo en este PC.</p>
+      <p class="sheet-note" data-i18n="connectNote"></p>
     </div>
+  </div>
+
+  <!-- Configuración: idioma, cuenta de Spotify e inicio con Windows. -->
+  <div class="settings" id="settings" hidden>
+    <h2 data-i18n="settingsTitle"></h2>
+
+    <section class="set-block">
+      <div class="set-head"><h3 data-i18n="language"></h3><p data-i18n="languageHint"></p></div>
+      <div class="segmented" id="lang-options"></div>
+    </section>
+
+    <section class="set-block">
+      <div class="set-head">
+        <h3 data-i18n="account"></h3>
+        <span class="account-status" id="account-status"></span>
+      </div>
+      <p class="set-hint" data-i18n="accountOptional"></p>
+      <label class="field-label" for="settings-client-id" data-i18n="clientId"></label>
+      <form class="connect-form" id="settings-form">
+        <input id="settings-client-id" data-i18n-placeholder="clientIdPlaceholder" spellcheck="false" autocomplete="off">
+        <button type="submit" id="settings-connect"></button>
+      </form>
+      <p class="connect-status" id="settings-status"></p>
+      <div class="set-actions">
+        <button class="text-btn" data-action="settings-guide" data-i18n="howToGetClientId"></button>
+        <button class="ghost-btn" data-action="settings-logout" id="settings-logout" data-i18n="disconnect"></button>
+      </div>
+    </section>
+
+    <section class="set-block set-row">
+      <div class="set-head"><h3 data-i18n="startWithWindows"></h3><p data-i18n="startWithWindowsHint"></p></div>
+      <label class="switch"><input type="checkbox" id="login-item"><span></span></label>
+    </section>
   </div>
 
   <div class="toast" id="toast" role="status"></div>
 
+  <script src="../i18n.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

@@ -1,13 +1,15 @@
 // Capturas del README con canciones reales (Billboard Hot 100, portadas oficiales vía Spotify).
 // Abre la app real en modo demo, le pasa esos datos y fotografía cada función. El buscador y la vista
 // de artista usan búsquedas reales con la cuenta conectada en Vinilify (solo lectura).
-// Uso (con Vinilify cerrado): electron scripts/readme-shots.js   (desde la carpeta promo)
+// Uso (con Vinilify cerrado): electron scripts/readme-shots.js --lang=en|es   (desde la carpeta promo)
 const { app, BrowserWindow, ipcMain } = require('electron');
 const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '../..');
-const DOCS = path.join(ROOT, 'docs');
+const LANG = (process.argv.find((a) => a.startsWith('--lang=')) || '--lang=en').slice(7);
+const DOCS = path.join(ROOT, 'docs', LANG);
+fs.mkdirSync(DOCS, { recursive: true });
 const { Spotify } = require(path.join(ROOT, 'src/spotify'));
 
 // Billboard Hot 100, top 10 de octubre de 2026.
@@ -82,8 +84,19 @@ app.whenReady().then(async () => {
   const lines = await lrclibLines(...SONGS.lyrics);
   console.log('✓ letra:', lines.length, 'líneas');
 
+  // El idioma de las capturas se pone como en la app; al final se deja el que tenía el usuario.
+  let originalLang = null;
+  try {
+    originalLang = JSON.parse(fs.readFileSync(path.join(realUserData, 'settings.json'), 'utf8')).language || null;
+  } catch {
+    // Sin ajustes guardados.
+  }
+  const restoreLang = () => originalLang && ipcMain.emit('settings:language', {}, originalLang);
+
   require(path.join(ROOT, 'src/main.js'));
   await wait(3500);
+  ipcMain.emit('settings:language', {}, LANG);
+  await wait(500);
   const find = (mode) => BrowserWindow.getAllWindows().find((w) => w.webContents.getURL().includes(`mode=${mode}`));
   const full = find('full');
   if (!full) throw new Error('No se abrió la pantalla completa');
@@ -104,7 +117,7 @@ app.whenReady().then(async () => {
   const save = async (win, name, format = 'jpg') => {
     const img = await win.webContents.capturePage();
     fs.writeFileSync(path.join(DOCS, name), format === 'png' ? img.toPNG() : img.toJPEG(92));
-    console.log('→', path.join('docs', name), img.getSize());
+    console.log('→', path.join('docs', LANG, name), img.getSize());
   };
   const awake = (on) => js(full, `document.body.classList.${on ? 'add' : 'remove'}('awake')`);
 
@@ -115,7 +128,7 @@ app.whenReady().then(async () => {
   await show(full, stateFor(main, main.durationMs * 0.36));
   await awake(true);
   await wait(500);
-  await save(full, 'pantalla-completa.jpg');
+  await save(full, 'fullscreen.jpg');
   await awake(false);
 
   // 2) Letra sincronizada
@@ -123,7 +136,7 @@ app.whenReady().then(async () => {
   await show(full, stateFor(sung, focus.t + 600, { lyrics: { id: sung.id, lines }, queue: next.slice(2), recent }));
   await js(full, "if (document.getElementById('lyrics').hidden) document.getElementById('btn-lyrics').click()");
   await wait(1500);
-  await save(full, 'letra.jpg');
+  await save(full, 'lyrics.jpg');
   await js(full, "if (!document.getElementById('lyrics').hidden) document.getElementById('btn-lyrics').click()");
 
   // 3) Buscador y 4) vista de artista (búsquedas reales)
@@ -132,10 +145,10 @@ app.whenReady().then(async () => {
     const i = document.getElementById('search-input'); i.value = ${JSON.stringify(SEARCH_QUERY)}; i.dispatchEvent(new Event('input'));`);
   await wait(4000);
   console.log('[buscador] panel oculto:', await js(full, "document.getElementById('search').hidden"), '| modal oculto:', await js(full, "document.getElementById('connect').hidden"), '| fuente:', await js(full, 'document.body.dataset.status'));
-  await save(full, 'buscador.jpg');
+  await save(full, 'search.jpg');
   await js(full, "document.querySelector('.tile[data-kind=artist]').click()");
   await wait(5000);
-  await save(full, 'artista.jpg');
+  await save(full, 'artist.jpg');
   await js(full, "document.querySelector('[data-action=search-close]').click()");
 
   // 5) Sin cuenta: al pulsar Buscar aparece la guía para conectar la API (opcional)
@@ -145,7 +158,7 @@ app.whenReady().then(async () => {
   // La guía rellena el Client ID guardado: en una imagen pública debe quedar vacío.
   await js(full, "document.getElementById('connect-id').value = ''; document.activeElement?.blur()");
   await wait(200);
-  await save(full, 'sin-cuenta.jpg');
+  await save(full, 'no-account.jpg');
   await js(full, "document.querySelector('[data-action=connect-close]').click()");
 
   // 6) Modo protección
@@ -155,7 +168,7 @@ app.whenReady().then(async () => {
   // Sin los controles de arriba (aparecen solo al mover el mouse).
   await js(full, "document.body.classList.remove('awake'); document.body.classList.add('sleepy')");
   await wait(600);
-  await save(full, 'modo-proteccion.jpg');
+  await save(full, 'protection.jpg');
 
   await js(full, lyricsPref === null ? "localStorage.removeItem('vinilify.lyrics')" : `localStorage.setItem('vinilify.lyrics', ${JSON.stringify(lyricsPref)})`);
 
@@ -169,5 +182,7 @@ app.whenReady().then(async () => {
   await js(miniWin, "document.body.classList.add('awake')");
   await wait(1800); // que termine el fundido de la tarjeta del título
   await save(miniWin, 'mini.png', 'png');
+  restoreLang();
+  await wait(300);
   app.exit(0);
 });

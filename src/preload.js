@@ -26,6 +26,15 @@ contextBridge.exposeInMainWorld('vinilify', {
   moveMini: (x, y) => ipcRenderer.send('mini:move', { x, y }),
   miniMoved: () => ipcRenderer.send('mini:moved'),
 
+  onAccountChanged: on('account:changed'),
+  settings: {
+    open: () => ipcRenderer.send('settings:open'),
+    get: () => ipcRenderer.invoke('settings:get'),
+    setLanguage: (lang) => ipcRenderer.send('settings:language', lang),
+    setLoginItem: (on) => ipcRenderer.send('settings:login-item', on),
+    logout: () => ipcRenderer.send('account:logout'),
+  },
+
   setup: {
     get: () => ipcRenderer.invoke('setup:get'),
     connect: (clientId) => ipcRenderer.invoke('setup:connect', clientId),
